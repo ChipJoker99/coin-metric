@@ -77,3 +77,28 @@ class CoinPredictor:
         model = CoinEmbeddingModel(embedding_dim=embedding_dim, pretrained=False)
         index = CoinIndex.load(index_path)
         return cls(model=model, index=index, device=device)
+
+    @classmethod
+    def from_checkpoint(
+        cls,
+        checkpoint_path: Union[str, Path],
+        index_path: Union[str, Path],
+        device: str = "cpu",
+    ) -> "CoinPredictor":
+        """
+        Load a trained model from a checkpoint file and a saved index.
+
+        The checkpoint must have been saved by train_triplet.train(), which
+        stores a dict with 'model_state_dict' and 'config' keys.
+
+        Args:
+            checkpoint_path: Path to the .pt checkpoint file.
+            index_path: Path to the saved CoinIndex pickle file.
+            device: Torch device string.
+        """
+        checkpoint = torch.load(checkpoint_path, map_location=device)
+        embedding_dim = checkpoint.get("config", {}).get("embedding_dim", 128)
+        model = CoinEmbeddingModel(embedding_dim=embedding_dim, pretrained=False)
+        model.load_state_dict(checkpoint["model_state_dict"])
+        index = CoinIndex.load(index_path)
+        return cls(model=model, index=index, device=device)
