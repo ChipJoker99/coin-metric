@@ -1,0 +1,102 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# pytest cache
+.pytest_cache/
+.cache/
+
+# mypy
+.mypy_cache/
+
+# ruff
+.ruff_cache/
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Logs
+# =========================
+*.log
+logs/
+
+# =========================
+# Copilot files
+# =========================
+.agents/
+.github/*
+!.github/workflows/
+!.github/workflows/**
+
+# =========================
+# Data
+# =========================
+coin-retrieval-engine/data/raw/
+coin-retrieval-engine/data/processed/
+coin-retrieval-engine/data/embeddings/
+
+!coin-retrieval-engine/data/raw/.gitkeep
+!coin-retrieval-engine/data/processed/.gitkeep
+!coin-retrieval-engine/data/embeddings/.gitkeep
+
+# =========================
+# Models (pesanti)
+# =========================
+coin-retrieval-engine/models/checkpoints/
+coin-retrieval-engine/models/embeddings/
+*.pt
+*.pth
+*.onnx
+
+# =========================
+# ML experiments
+# =========================
+runs/
+experiments/
+wandb/
+mlruns/
+
+# =========================
+# Docker
+# =========================
+*.pid
+*.log
+
+# =========================
+# Env files
+# =========================
+.env
+.env.local
+.env.*.local
+
+# =========================
+# Jupyter
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# OS / temp files
+# =========================
+*.tmp
+*.swp

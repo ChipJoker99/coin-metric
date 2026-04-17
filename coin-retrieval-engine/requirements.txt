@@ -1,0 +1,10 @@
+torch
+torchvision
+faiss-cpu
+opencv-python
+fastapi
+uvicorn
+streamlit
+pytest
+numpy
+scikit-learn
