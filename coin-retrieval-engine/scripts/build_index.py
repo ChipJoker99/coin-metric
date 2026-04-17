@@ -8,19 +8,19 @@ Usage:
     python scripts/build_index.py
 """
 
+from embeddings.model import CoinEmbeddingModel
+from retrieval.index import CoinIndex
+from training.dataset import CoinDataset
+
 import sys
 from pathlib import Path
 
-import numpy as np
+# import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
-
-from embeddings.model import CoinEmbeddingModel
-from retrieval.index import CoinIndex
-from training.dataset import CoinDataset
 
 DATA_DIR = ROOT / "data" / "raw"
 INDEX_PATH = ROOT / "data" / "embeddings" / "index.pkl"
