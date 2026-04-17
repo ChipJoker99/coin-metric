@@ -1,0 +1,18 @@
+[project]
+name = "coin-retrieval-engine"
+version = "0.1.0"
+requires-python = ">=3.10"
+
+dependencies = [
+    "torch",
+    "torchvision",
+    "numpy",
+    "pillow"
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}

@@ -13,6 +13,9 @@ venv/
 .venv/
 ENV/
 
+# Python packaging metadata
+*.egg-info/
+
 # pytest cache
 .pytest_cache/
 .cache/
@@ -40,6 +43,11 @@ Thumbs.db
 # =========================
 *.log
 logs/
+
+# =========================
+# Dev folders
+# =========================
+**/dev/
 
 # =========================
 # Copilot files
