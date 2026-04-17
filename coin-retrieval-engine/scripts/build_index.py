@@ -1,34 +1,53 @@
 """
 Build the retrieval index from raw coin images.
 
+Automatically uses the latest trained checkpoint from models/checkpoints/ if
+available. Falls back to pretrained ImageNet weights with a warning.
+
 Usage:
     python scripts/build_index.py
-
-Expects images organised as:
-    data/raw/<class_name>/<image_file>
-
-Saves the index to:
-    data/embeddings/index.pkl
 """
 
 import sys
 from pathlib import Path
 
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "src"))
 
-from src.embeddings.model import CoinEmbeddingModel
-from src.retrieval.index import CoinIndex
-from src.training.dataset import CoinDataset
+from embeddings.model import CoinEmbeddingModel
+from retrieval.index import CoinIndex
+from training.dataset import CoinDataset
 
 DATA_DIR = ROOT / "data" / "raw"
 INDEX_PATH = ROOT / "data" / "embeddings" / "index.pkl"
+CHECKPOINTS_DIR = ROOT / "models" / "checkpoints"
 BATCH_SIZE = 32
-EMBEDDING_DIM = 128
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
+
+def _latest_checkpoint() -> Path | None:
+    if not CHECKPOINTS_DIR.exists():
+        return None
+    checkpoints = sorted(CHECKPOINTS_DIR.glob("*.pt"))
+    return checkpoints[-1] if checkpoints else None
+
+
+def _load_model(checkpoint: Path | None) -> CoinEmbeddingModel:
+    if checkpoint:
+        ckpt = torch.load(checkpoint, map_location=DEVICE)
+        embedding_dim = ckpt.get("config", {}).get("embedding_dim", 128)
+        model = CoinEmbeddingModel(embedding_dim=embedding_dim, pretrained=False)
+        model.load_state_dict(ckpt["model_state_dict"])
+        print(f"  Loaded checkpoint: {checkpoint.name}  (embedding_dim={embedding_dim})")
+        return model
+
+    print("  ⚠  No checkpoint found — using pretrained ImageNet weights.")
+    print("     Run 'python scripts/train.py' first for better retrieval quality.")
+    return CoinEmbeddingModel(embedding_dim=128, pretrained=True)
 
 
 def build_index() -> None:
@@ -43,7 +62,8 @@ def build_index() -> None:
 
     loader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=0)
 
-    model = CoinEmbeddingModel(embedding_dim=EMBEDDING_DIM, pretrained=True)
+    checkpoint = _latest_checkpoint()
+    model = _load_model(checkpoint)
     model.eval().to(DEVICE)
 
     all_embeddings = []
@@ -63,7 +83,7 @@ def build_index() -> None:
                     "path": str(sample_path),
                 })
 
-    import numpy as np
+    import numpy as np  # noqa: F811 — already imported at top
     embeddings_array = np.array(all_embeddings, dtype="float32")
 
     index = CoinIndex()

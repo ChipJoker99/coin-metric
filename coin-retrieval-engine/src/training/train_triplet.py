@@ -40,6 +40,8 @@ def train(config: dict) -> tuple[CoinEmbeddingModel, list[float]]:
             - checkpoint_dir (str): Directory for model checkpoints.
             - checkpoint_every (int): Save checkpoint every N epochs. Default 5.
             - pretrained (bool): Use pretrained backbone. Default True.
+            - freeze_backbone (bool): Freeze backbone weights, train only the
+              projection head. Dramatically faster on CPU. Default False.
             - augment (bool): Apply augmentations. Default True.
             - seed (int | None): Optional seed for reproducibility. Default None.
 
@@ -69,9 +71,18 @@ def train(config: dict) -> tuple[CoinEmbeddingModel, list[float]]:
         embedding_dim=config.get("embedding_dim", 128),
         pretrained=config.get("pretrained", True),
     ).to(device)
+
+    if config.get("freeze_backbone", False):
+        for param in model.backbone.parameters():
+            param.requires_grad = False
+        trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        total = sum(p.numel() for p in model.parameters())
+        print(f"  Backbone frozen — trainable params: {trainable:,} / {total:,}")
+
     model.train()
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.get("lr", 1e-4))
+    trainable_params = [p for p in model.parameters() if p.requires_grad]
+    optimizer = torch.optim.Adam(trainable_params, lr=config.get("lr", 1e-4))
     criterion = nn.TripletMarginLoss(margin=config.get("margin", 0.3))
 
     checkpoint_dir = Path(config.get("checkpoint_dir", "models/checkpoints"))

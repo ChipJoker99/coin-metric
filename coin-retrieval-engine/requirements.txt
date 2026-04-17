@@ -8,3 +8,5 @@ streamlit
 pytest
 numpy
 scikit-learn
+pyyaml
+pillow

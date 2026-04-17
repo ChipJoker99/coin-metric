@@ -1,0 +1,39 @@
+# Training configuration for the Coin Retrieval Engine.
+# Used by: scripts/train.py
+# All paths are relative to the coin-retrieval-engine/ root.
+
+# ── Data ──────────────────────────────────────────────────────────────────────
+data_dir: data/raw
+checkpoint_dir: models/checkpoints
+index_path: data/embeddings/index.pkl
+
+# ── Model ─────────────────────────────────────────────────────────────────────
+backbone: resnet18       # resnet18 | efficientnet_b0
+embedding_dim: 128
+pretrained: true
+
+# freeze_backbone: freeze all ResNet layers except the projection head.
+# true  → only ~65k params trained instead of 11M → 5-10x faster on CPU
+#          ideal for small datasets (<500 imgs); ImageNet features are reused as-is
+# false → full fine-tuning; needed for large datasets or very different visual domains
+freeze_backbone: true
+
+# ── Triplet Loss ──────────────────────────────────────────────────────────────
+# margin: minimum distance enforced between positive and negative pairs.
+# Phase 2B (current): 0.5 — conservative, stable with small dataset (~100 imgs)
+# Phase 2C (more data): raise to 0.7 for tighter inter-class separation
+margin: 0.5
+
+# ── Optimizer ─────────────────────────────────────────────────────────────────
+lr: 0.001               # higher LR OK with frozen backbone (only projection head trains)
+epochs: 30              # 30 epochs sufficient when backbone is frozen
+batch_size: 16          # reduce to 8 if running on CPU with memory constraints
+
+# ── Augmentation ──────────────────────────────────────────────────────────────
+augment: true           # rotation, brightness jitter, gaussian blur, noise
+
+# ── Checkpointing ─────────────────────────────────────────────────────────────
+checkpoint_every: 10
+
+# ── Reproducibility ───────────────────────────────────────────────────────────
+seed: 42
